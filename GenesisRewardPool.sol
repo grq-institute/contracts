@@ -620,27 +620,4 @@ contract GenesisRewardPool is ReentrancyGuard {
         emit OperatorUpdated(oldOperator, _operator);
     }
 
-    /**
-     * @dev Governance function to recover unsupported tokens
-     * @notice This does not allow to recover any pool tokens for 14 days
-     * @param _token Token to recover
-     * @param amount Amount to recover
-     * @param to Recipient address
-     */
-    function governanceRecoverUnsupported(IERC20 _token, uint256 amount, address to) external onlyOperator {
-        // Never allow recovery of the reward token
-        require(_token != rewardToken, "token cannot be reward token");
-
-        if (block.timestamp < poolEndTime + 14 days) {
-            // do not allow to recover tokens if less than 14 days after pool ends
-            uint256 length = poolInfo.length;
-            for (uint256 pid = 0; pid < length; ++pid) {
-                PoolInfo storage pool = poolInfo[pid];
-                require(_token != pool.token, "token cannot be pool token");
-            }
-        }
-
-        _token.safeTransfer(to, amount);
-        emit TokensRecovered(address(_token), to, amount);
-    }
 }
